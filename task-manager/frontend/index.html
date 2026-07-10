@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Task Management System</title>
+  <meta name="description" content="Modern full-stack task management system to track employee tasks, completion status, and team productivity." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Animated background orbs -->
+<div class="orbs" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div class="wrapper">
+
+  <!-- ══════════════ HEADER ══════════════ -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">📋</div>
+      <div class="brand-text">
+        <h1>TaskFlow</h1>
+        <span>Task Management System</span>
+      </div>
+    </div>
+    <button class="btn-primary" id="btn-open-add" aria-label="Add new task">
+      <span aria-hidden="true">＋</span> Add Task
+    </button>
+  </header>
+
+  <!-- ══════════════ STATS ══════════════ -->
+  <section class="stats-grid" aria-label="Dashboard statistics">
+    <div class="stat-card">
+      <div class="stat-icon ic-purple">📊</div>
+      <div class="stat-num c-purple" id="s-total">—</div>
+      <div class="stat-lbl">Total Tasks</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon ic-green">✅</div>
+      <div class="stat-num c-green" id="s-done">—</div>
+      <div class="stat-lbl">Completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon ic-amber">⏳</div>
+      <div class="stat-num c-amber" id="s-pending">—</div>
+      <div class="stat-lbl">Pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon ic-cyan">👥</div>
+      <div class="stat-num c-cyan" id="s-emp">—</div>
+      <div class="stat-lbl">Employees</div>
+    </div>
+  </section>
+
+  <!-- ══════════════ SEARCH & FILTER ══════════════ -->
+  <div class="filter-bar" role="search" aria-label="Search and filter tasks">
+    <div class="search-box">
+      <span class="ico" aria-hidden="true">🔍</span>
+      <input
+        type="search"
+        id="inp-search"
+        class="fi"
+        placeholder="Search by employee name or task title…"
+        aria-label="Search tasks"
+        autocomplete="off"
+      />
+    </div>
+    <select id="sel-status" class="fi fi-plain" style="width:auto;min-width:160px" aria-label="Filter by status">
+      <option value="">All Status</option>
+      <option value="true">✅ Completed</option>
+      <option value="false">⏳ Pending</option>
+    </select>
+  </div>
+
+  <!-- ══════════════ TASK TABLE ══════════════ -->
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <h2>All Tasks</h2>
+      <span class="tbl-badge" id="tbl-count">Loading…</span>
+    </div>
+    <table id="task-table" aria-label="Task list">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Employee</th>
+          <th scope="col">Task Title</th>
+          <th scope="col">Status</th>
+          <th scope="col">Created</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <!-- rows injected by JS -->
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /.wrapper -->
+
+
+<!-- ══════════════ ADD / EDIT MODAL ══════════════ -->
+<div class="overlay" id="form-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title" id="modal-title">Add New Task</span>
+      <button class="btn-close" id="btn-form-close" aria-label="Close">✕</button>
+    </div>
+
+    <form id="task-form" novalidate autocomplete="off">
+      <input type="hidden" id="f-id" />
+
+      <!-- Employee Name -->
+      <div class="form-grp">
+        <label class="form-lbl" for="f-emp">Employee Name <span class="req">*</span></label>
+        <input type="text" id="f-emp" class="fi fi-plain" placeholder="e.g. Alice Johnson" />
+        <div class="form-err" id="err-emp">Employee name is required.</div>
+      </div>
+
+      <!-- Task Title -->
+      <div class="form-grp">
+        <label class="form-lbl" for="f-title">Task Title <span class="req">*</span></label>
+        <input
+          type="text" id="f-title" class="fi fi-plain"
+          placeholder="e.g. Design UI Mockups"
+          list="title-suggestions"
+        />
+        <datalist id="title-suggestions">
+          <option value="Design UI Mockups" />
+          <option value="Set Up Database Schema" />
+          <option value="Implement REST API" />
+          <option value="Write Unit Tests" />
+          <option value="Deploy to Staging Server" />
+          <option value="Code Review and QA" />
+          <option value="Client Presentation Prep" />
+          <option value="Documentation Update" />
+          <option value="Performance Optimization" />
+          <option value="Security Audit" />
+          <option value="Bug Fix" />
+          <option value="Sprint Planning" />
+          <option value="Feature Development" />
+          <option value="Data Migration" />
+        </datalist>
+        <div class="form-err" id="err-title">Task title is required.</div>
+      </div>
+
+      <!-- Completed Toggle -->
+      <div class="form-grp">
+        <label class="form-lbl">Completion Status</label>
+        <div class="toggle-row">
+          <span class="toggle-lbl-txt" id="tog-label">Mark as Pending</span>
+          <label class="sw" for="f-done">
+            <input type="checkbox" id="f-done" />
+            <span class="sw-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-ftr">
+        <button type="button" class="btn btn-cancel" id="btn-form-cancel">Cancel</button>
+        <button type="submit" class="btn btn-save"   id="btn-form-submit">Create Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ══════════════ DELETE CONFIRM MODAL ══════════════ -->
+<div class="overlay" id="del-overlay" role="dialog" aria-modal="true" aria-labelledby="del-heading">
+  <div class="modal" style="max-width:400px">
+    <div class="del-body">
+      <div class="del-icon">🗑️</div>
+      <h3 id="del-heading">Delete Task?</h3>
+      <p>This cannot be undone. The task will be permanently removed from the database.</p>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-cancel" id="btn-del-cancel">Cancel</button>
+      <button class="btn btn-danger" id="btn-del-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════ TOAST CONTAINER ══════════════ -->
+<div id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+
+<script src="app.js"></script>
+</body>
+</html>
